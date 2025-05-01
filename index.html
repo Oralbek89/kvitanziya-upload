@@ -1,11 +1,141 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Квитанция Пятн.OFF</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Квитанция химчистки «Пятн.OFF»</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    form > div {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .submit-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .reset-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
 </head>
 <body>
-    <h2>Это тестовая квитанция для загрузки на Vercel</h2>
-    <p>Все поля формы и логика отправки уже внутри. Проверь интеграцию с Webhook.</p>
+  <div class="container">
+    <h2>Квитанция химчистки «Пятн.OFF»</h2>
+    <form id="receiptForm">
+      <div><label>1. Номер квитанции</label><input name="номер_квитанции" required></div>
+      <div><label>2. Дата приёма</label><input name="дата_приема" type="date" required></div>
+      <div><label>3. ФИО клиента</label><input name="фио_клиента" required></div>
+      <div><label>4. Телефон</label><input name="телефон" type="tel" required></div>
+      <div><label>5. Адрес</label><input name="адрес"></div>
+      <div><label>6. Наименование изделия</label><input name="изделие" required></div>
+      <div><label>7. Цвет</label><input name="цвет"></div>
+      <div><label>8. Бренд</label><input name="бренд"></div>
+      <div><label>9. Размер</label><input name="размер"></div>
+      <div><label>10. Пол</label><select name="пол"><option>Мужской</option><option>Женский</option></select></div>
+      <div><label>11. Дефекты</label><textarea name="дефекты"></textarea></div>
+      <div><label>12. Риски после чистки</label><textarea name="риски"></textarea></div>
+      <div><label>13. Особенности (капюшон, мех, пояс)</label><input name="особенности"></div>
+      <div><label>14. Маркировка</label><select name="маркировка"><option>Есть</option><option>Частичная</option><option>Нет</option></select></div>
+      <div><label>15. Пятна</label><textarea name="пятна"></textarea></div>
+      <div><label>16. Комментарий</label><textarea name="комментарий"></textarea></div>
+      <div><label>17. Экспресс-чистка (доплата)</label><input name="экспресс_чистка" type="number" value="0"></div>
+      <div><label>18. Стоимость чистки</label><input name="стоимость" type="number" required></div>
+      <div><label>19. Аванс</label><input name="аванс" type="number" value="0"></div>
+      <div><label>20. Скидка</label><input name="скидка" type="number" value="0"></div>
+      <div><label>21. Итого к оплате</label><input name="итого" type="number" readonly></div>
+
+      <div class="buttons">
+        <button type="submit" class="submit-btn">Сохранить и отправить</button>
+        <button type="reset" class="reset-btn">Сброс</button>
+      </div>
+    </form>
+
+    <footer>
+      © Химчистка «Пятн.OFF». Все права защищены.
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('receiptForm');
+
+    function calculateTotal() {
+      const cost = parseFloat(form.стоимость.value) || 0;
+      const discount = parseFloat(form.скидка.value) || 0;
+      const advance = parseFloat(form.аванс.value) || 0;
+      const express = parseFloat(form.экспресс_чистка.value) || 0;
+      const total = cost + express - discount - advance;
+      form.итого.value = total > 0 ? total.toFixed(0) : 0;
+    }
+
+    ['стоимость', 'скидка', 'аванс', 'экспресс_чистка'].forEach(id => {
+      form[id].addEventListener('input', calculateTotal);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      try {
+        const response = await fetch("https://oralbek.app.n8n.cloud/webhook-test/webhook-test/e6dbc64b-45c3-4cd4-8583-f8372899c6b2", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data),
+        });
+        alert("Данные отправлены!");
+        form.reset();
+        form.итого.value = '';
+      } catch (err) {
+        alert("Ошибка отправки!");
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
